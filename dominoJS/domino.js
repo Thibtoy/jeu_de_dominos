@@ -439,8 +439,13 @@ game.dominos.FixPosHoriStart = function(x, y, s1, s2, lien, ag, par, fnct1, fnct
   var Xcomp = parseInt(game.dominos.board[7].getAttribute("pos-x"));
   var Yend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-y"));
   var Xend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-x"));
+  var Ycompend = parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-y"));
+  var Xcompend = parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-x"));
   var angleStart = parseInt(game.dominos.board[0].getAttribute("ag"));
   var angleEnd = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("ag"));
+  var start = game.dominos.startOrEnd(s1, s2, start, start, end);
+  var end = game.dominos.startOrEnd(s1, s2, end, start, end);
+  
   if (angleStart === 0 || angleStart === 180) {
     if (Ystart < Ycomp) {
       if (x < (Xstart+1) && y > (Ystart-1)) {
@@ -485,6 +490,28 @@ else
     if(Xstart > Xcomp) {
       game.dominos.tcheck(Xstart, Ystart, -28, +12, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
     }
+  }
+}
+
+game.dominos.startOrEnd = function(s1, s2, qui, start, end) {
+  var valstart = parseInt(game.dominos.board[0].getAttribute("value"));
+  var valend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("value"));
+  if (s1 === valstart || s2 === valstart) {
+    if (qui == start) {
+      return true;
+    }
+  else {
+      return false;
+  }
+  }
+else
+  if (s1 === valend || s2 === valend) {
+    if (qui == start) {
+      return false;
+    }
+  else {
+      return true;
+  }
   }
 }
 
