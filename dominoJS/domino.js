@@ -57,8 +57,6 @@ class Domino {
             game.dominos.premierPlacementHori(posx, posy, side1, side2, this.ag);
           }
           game.tour = 1;
-          game.dominos.lastRotate = this.ag;
-          game.players.win(); 
         }
       else {
             if (this.ag === 0 || this.ag === 180) {
@@ -191,6 +189,7 @@ game.dominos.premierPlacementVerti = function(x, y, s1, s2, ag) {
       }
     }
   }
+  game.players.win();
 }
 
 game.dominos.premierPlacementHori = function(x, y, s1, s2, ag) {
@@ -209,6 +208,7 @@ game.dominos.premierPlacementHori = function(x, y, s1, s2, ag) {
       }
     }
   }
+  game.players.win();
 }
 
 game.dominos.retour = function(par, lien, ag, fnct1, fnct2) {
@@ -226,32 +226,31 @@ game.dominos.retour = function(par, lien, ag, fnct1, fnct2) {
 
 
 game.dominos.tcheck = function(x, y, a, b, s1, s2, lien, ag, resultat, cas, par, fnct1, fnct2) {
-  var valstart = parseInt(game.dominos.board[0].getAttribute("value"));
-  var valend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("value"));
+  var chain = (resultat == "start" || resultat == "startdown")? parseInt(game.dominos.board[0].getAttribute("value")) : parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("value"));
   lien.style.top = (y*10)+a+"px";
   lien.style.left = (x*10)+b+"px";     
   var posx = (parseInt(lien.style.left, 10)+8)/10; 
   var posy = (parseInt(lien.style.top, 10)+8)/10;
-  if (s1 === valstart || s2 === valstart) {
+  if (s1 === chain || s2 === chain) {
    if (cas == "cas1") {
        if (ag === 0 || ag === 180) {
-        if (s1 === valstart) {
+        if (s1 === chain) {
          lien.style.transform = 'rotate('+180+'deg)';
          game.dominos.autrePlacementVerti(posx, posy, s2, s1, lien, resultat, 180);
         }
       else
-        if (s2 === valstart) {
+        if (s2 === chain) {
           lien.style.transform = 'rotate('+0+'deg)';
          game.dominos.autrePlacementVerti(posx, posy, s1, s2, lien, resultat, 0);
         }
        }
        if (ag === 90 || ag === 270) {
-        if (s1 === valstart) {
+        if (s1 === chain) {
          lien.style.transform = 'rotate('+270+'deg)';
          game.dominos.autrePlacementHori(posx, posy, s2, s1, lien, resultat, 270);
        }
        else
-        if (s2 === valstart) {
+        if (s2 === chain) {
           lien.style.transform = 'rotate('+90+'deg)';
          game.dominos.autrePlacementHori(posx, posy, s1, s2, lien, resultat, 90);
         }
@@ -260,23 +259,23 @@ game.dominos.tcheck = function(x, y, a, b, s1, s2, lien, ag, resultat, cas, par,
    else
     if (cas == "cas2") {
        if (ag === 0 || ag === 180) {
-        if (s1 === valstart) {
+        if (s1 === chain) {
          lien.style.transform = 'rotate('+0+'deg)';
          game.dominos.autrePlacementVerti(posx, posy, s1, s2, lien, resultat, 0);
         }
       else
-        if (s2 === valstart) {
+        if (s2 === chain) {
           lien.style.transform = 'rotate('+180+'deg)';
          game.dominos.autrePlacementVerti(posx, posy, s2, s1, lien, resultat, 180);
         }
        }
        if (ag === 90 || ag === 270) {
-        if (s1 === valstart) {
+        if (s1 === chain) {
          lien.style.transform = 'rotate('+90+'deg)';
          game.dominos.autrePlacementHori(posx, posy, s1, s2, lien, resultat, 90);
        }
        else
-        if (s2 === valstart) {
+        if (s2 === chain) {
           lien.style.transform = 'rotate('+270+'deg)';
          game.dominos.autrePlacementHori(posx, posy, s2, s1, lien, resultat, 270);
         }
@@ -291,11 +290,11 @@ var alors = function(x, r, t) {
                 game.dominos.board.unshift(x);
               }
             else
-              if (r == "startdown"){
-                t.unshift(x);
+              if (r == "end") {
+                game.dominos.board.push(x);
               }
             else
-              if (r == "end") {
+              if (r == "startdown" || r == "enddown") {
                 t.unshift(x);
               }
             }
@@ -316,12 +315,9 @@ game.dominos.autrePlacementVerti = function(x, y, s1, s2, lien, resultat, ag) {
         }
       }
   if (tableauTemporaire.length != 0) {
-    var index = 0;
-    var len = game.dominos.board.length;
-    if (resultat == "end") {
-    for (var i = len; i < len+8; i++) {
-      game.dominos.board[i] = tableauTemporaire[index];
-      index++;
+    if (resultat == "enddown") {
+    for (var i = 0; i < tableauTemporaire.length; i++) {
+      game.dominos.board.push(tableauTemporaire[i]);
     }
   }
   else
@@ -331,67 +327,65 @@ game.dominos.autrePlacementVerti = function(x, y, s1, s2, lien, resultat, ag) {
       }
     }
   }
-
+  game.players.win();
 }
 
 game.dominos.FixPosVertiStart = function(x, y, s1, s2, lien, ag, par, fnct1, fnct2) {
-  var Ystart = parseInt(game.dominos.board[0].getAttribute("pos-y"));
-  var Xstart = parseInt(game.dominos.board[0].getAttribute("pos-x"));
-  var Ycomp = parseInt(game.dominos.board[7].getAttribute("pos-y"));
-  var Xcomp = parseInt(game.dominos.board[7].getAttribute("pos-x"));
-  var Yend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-y"));
-  var Xend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-x"));
-  var angleStart = parseInt(game.dominos.board[0].getAttribute("ag"));
-  var angleEnd = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("ag"));
-  if (angleStart === 0 || angleStart === 180) {
-    if (Ystart < Ycomp) {
-      game.dominos.tcheck(Xstart, Ystart, -48, -8, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2) ;
+  var comp = game.dominos.startOrEnd(s1, s2);
+  var Ychain = (comp == true)? parseInt(game.dominos.board[0].getAttribute("pos-y")) : (comp == false)? parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-y")) : game.dominos.retour(par, lien, ag, fnct1, fnct2);
+  var Xchain = (comp == true)? parseInt(game.dominos.board[0].getAttribute("pos-x")) : parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-x"));
+  var Ycomp  = (comp == true)? parseInt(game.dominos.board[7].getAttribute("pos-y")) : parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-y"));
+  var Xcomp  = (comp == true)? parseInt(game.dominos.board[7].getAttribute("pos-x")) : parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-x"));
+  var angle  = (comp == true)? parseInt(game.dominos.board[0].getAttribute("ag")) : parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("ag"));
+  var cas = (comp == true)? "start" : "end";
+  if (angle === 0 || angle === 180) {
+    if (Ychain < Ycomp) {
+      game.dominos.tcheck(Xchain, Ychain, -48, -8, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
       
     }
   else 
-    if (Ystart > Ycomp) {
-      game.dominos.tcheck(Xstart, Ystart, 2, -18, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+    if (Ychain > Ycomp) {
+      game.dominos.tcheck(Xchain, Ychain, 2, -18, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
   }
   }
 else
-  if (angleStart === 90 || angleStart === 270) {
-    if (Xstart < Xcomp) {
-    if (y <= Ystart && x >= Xstart) {
-      game.dominos.tcheck(Xstart, Ystart, -48, -8, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2) ;//game.dominos.autrePlacementVerti(Xstart, Ystart, 48, 8, s1, s2, lien, "start", ag);
+  if (angle === 90 || angle === 270) {
+    if (Xchain < Xcomp) {
+    if (y <= Ychain && x >= Xchain) {
+      game.dominos.tcheck(Xchain, Ychain, -48, -8, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
   }
 else
-  if (y < (Ystart+1) && x < Xstart) {
-      game.dominos.tcheck(Xstart, Ystart, -28, -28, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2) ;//game.dominos.autrePlacementVerti(Xstart, Ystart, 48, 8, s1, s2, lien, "start", ag);
+  if (y < (Ychain+1) && x < Xchain) {
+      game.dominos.tcheck(Xchain, Ychain, -28, -28, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
+  }
+else
+  if (y > Ychain && x < Xchain) {
+      game.dominos.tcheck(Xchain, Ychain, -8, -28, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
 
   }
 else
-  if (y > Ystart && x < Xstart) {
-      game.dominos.tcheck(Xstart, Ystart, -8, -28, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+  if (y > (Ychain+1) && x > (Xchain-1)) {
+      game.dominos.tcheck(Xchain, Ychain, 12, -8, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
+  }
+  }
+else
+  if (Xchain > Xcomp) {
+    if (y < Ychain && x > (Xchain-1)) {
+      game.dominos.tcheck(Xchain, Ychain, -38, 2, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
+  }
+else
+  if (y < Ychain && x < Xchain) {
+      game.dominos.tcheck(Xchain, Ychain, -58, -18, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
 
   }
 else
-  if (y > (Ystart+1) && x > (Xstart-1)) {
-      game.dominos.tcheck(Xstart, Ystart, 12, -8, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
-  }
-  }
-else
-  if (Xstart > Xcomp) {
-    if (y < Ystart && x > (Xstart-1)) {
-      game.dominos.tcheck(Xstart, Ystart, -38, 2, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2) ;
-  }
-else
-  if (y < Ystart && x < Xstart) {
-      game.dominos.tcheck(Xstart, Ystart, -58, -18, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2) ;
+  if (y > (Ychain-1) && x < Xchain) {
+      game.dominos.tcheck(Xchain, Ychain, 2, -18, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
 
   }
 else
-  if (y > (Ystart-1) && x < Xstart) {
-      game.dominos.tcheck(Xstart, Ystart, 2, -18, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
-
-  }
-else
-  if (y > (Ystart-1) && x > (Xstart-1)) {
-      game.dominos.tcheck(Xstart, Ystart, -18, +2, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+  if (y > (Ychain-1) && x > (Xchain-1)) {
+      game.dominos.tcheck(Xchain, Ychain, -18, +2, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
   }
   }
   }
@@ -416,10 +410,9 @@ game.dominos.autrePlacementHori = function(x, y, s1, s2, lien, resultat, ag) {
   if (tableauTemporaire.length != 0) {
     var index = 0;
     var len = game.dominos.board.length;
-    if (resultat == "end") {
-    for (var i = len; i < len+8; i++) {
-      game.dominos.board[i] = tableauTemporaire[index];
-      index++;
+    if (resultat == "enddown") {
+    for (var i = 0; i < tableauTemporaire.length; i++) {
+      game.dominos.board.push(tableauTemporaire[i]);
     }
   }
   else
@@ -429,89 +422,103 @@ game.dominos.autrePlacementHori = function(x, y, s1, s2, lien, resultat, ag) {
       }
     }
   }
-
+  game.players.win();
 }
 
 game.dominos.FixPosHoriStart = function(x, y, s1, s2, lien, ag, par, fnct1, fnct2) {
-  var Ystart = parseInt(game.dominos.board[0].getAttribute("pos-y"));
-  var Xstart = parseInt(game.dominos.board[0].getAttribute("pos-x"));
-  var Ycomp = parseInt(game.dominos.board[7].getAttribute("pos-y"));
-  var Xcomp = parseInt(game.dominos.board[7].getAttribute("pos-x"));
-  var Yend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-y"));
-  var Xend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-x"));
-  var Ycompend = parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-y"));
-  var Xcompend = parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-x"));
-  var angleStart = parseInt(game.dominos.board[0].getAttribute("ag"));
-  var angleEnd = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("ag"));
-  var start = game.dominos.startOrEnd(s1, s2, start, start, end);
-  var end = game.dominos.startOrEnd(s1, s2, end, start, end);
-  
-  if (angleStart === 0 || angleStart === 180) {
-    if (Ystart < Ycomp) {
-      if (x < (Xstart+1) && y > (Ystart-1)) {
-      game.dominos.tcheck(Xstart, Ystart, -18, -38, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2);
+  var comp = game.dominos.startOrEnd(s1, s2, par, lien, ag, fnct1, fnct2);
+  var Ychain = (comp == true)? parseInt(game.dominos.board[0].getAttribute("pos-y")) : parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-y"));
+  var Xchain = (comp == true)? parseInt(game.dominos.board[0].getAttribute("pos-x")) : parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("pos-x"));
+  var Ycomp  = (comp == true)? parseInt(game.dominos.board[7].getAttribute("pos-y")) : parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-y"));
+  var Xcomp  = (comp == true)? parseInt(game.dominos.board[7].getAttribute("pos-x")) : parseInt(game.dominos.board[game.dominos.board.length-8].getAttribute("pos-x"));
+  var angle  = (comp == true)? parseInt(game.dominos.board[0].getAttribute("ag")) : parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("ag"));
+  var cas = (comp == true)? "start" : "end";
+  if (angle === 0 || angle === 180) {//angle
+    if (Ychain < Ycomp) {//ystart Y comp
+      if (x < (Xchain+1) && y > (Ychain-1)) {
+       game.dominos.tcheck(Xchain, Ychain, -18, -38, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2); 
     }
   else
-    if (x < (Xstart+1) && y < (Ystart)) {
-      game.dominos.tcheck(Xstart, Ystart, -38, -18, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2);
+    if (x < (Xchain+1) && y < (Ychain)) {
+       game.dominos.tcheck(Xchain, Ychain, -38, -18, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2); 
     }
   else
-    if (x > Xstart && y > (Ystart-1)) {
-      game.dominos.tcheck(Xstart, Ystart, -18, 22, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+    if (x > Xchain && y > (Ychain-1)) {
+       game.dominos.tcheck(Xchain, Ychain, -18, 22, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
     }
   else
-    if (x > (Xstart) && y < (Ystart)) {
-      game.dominos.tcheck(Xstart, Ystart, -38, 2, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+    if (x > (Xchain) && y < (Ychain)) {
+       game.dominos.tcheck(Xchain, Ychain, -38, 2, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2); 
     }
     }
-    if (Ystart > Ycomp) {
-      if (x < Xstart && y > (Ystart-1)) {
-      game.dominos.tcheck(Xstart, Ystart, -8, -28, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2);
-    }
-  else
-    if (x < Xstart && y < (Ystart)) {
-      game.dominos.tcheck(Xstart, Ystart, -28, -48, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2);
+    if (Ychain > Ycomp) {
+      if (x < Xchain && y > (Ychain-1)) {
+      game.dominos.tcheck(Xchain, Ychain, -8, -28, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
     }
   else
-    if (x > (Xstart-1) && y > (Ystart-1)) {
-      game.dominos.tcheck(Xstart, Ystart, -8, -8, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+    if (x < Xchain && y < (Ychain)) {
+      game.dominos.tcheck(Xchain, Ychain, -28, -48, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
     }
   else
-    if (x > (Xstart-1) && y < (Ystart)) {
-      game.dominos.tcheck(Xstart, Ystart, -28, 12, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+    if (x > (Xchain-1) && y > (Ychain-1)) {
+      game.dominos.tcheck(Xchain, Ychain, -8, -8, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
+    }
+  else
+    if (x > (Xchain-1) && y < (Ychain)) {
+      game.dominos.tcheck(Xchain, Ychain, -28, 12, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
     }
     }
   }
 else
-  if (angleStart === 90 || angleStart === 270) {
-    if(Xstart < Xcomp) {
-      game.dominos.tcheck(Xstart, Ystart, -18, -38, s1, s2, lien, ag, "start", "cas1", par, fnct1, fnct2);
+  if (angle === 90 || angle === 270) {
+    if(Xchain < Xcomp) {
+      game.dominos.tcheck(Xchain, Ychain, -18, -38, s1, s2, lien, ag, cas, "cas1", par, fnct1, fnct2) ;
     }
-    if(Xstart > Xcomp) {
-      game.dominos.tcheck(Xstart, Ystart, -28, +12, s1, s2, lien, ag, "startdown", "cas2", par, fnct1, fnct2) ;
+    if(Xchain > Xcomp) {
+      game.dominos.tcheck(Xchain, Ychain, -28, 12, s1, s2, lien, ag, cas+"down", "cas2", par, fnct1, fnct2) ;
     }
   }
 }
 
-game.dominos.startOrEnd = function(s1, s2, qui, start, end) {
+game.dominos.startOrEnd = function(s1, s2, par, lien, ag, fnct1, fnct2) {
   var valstart = parseInt(game.dominos.board[0].getAttribute("value"));
   var valend = parseInt(game.dominos.board[game.dominos.board.length-1].getAttribute("value"));
-  if (s1 === valstart || s2 === valstart) {
-    if (qui == start) {
-      return true;
-    }
-  else {
-      return false;
+  if ((s1 === valstart || s2 === valstart) && (s1 === valend || s2 === valend)) {
+    return game.dominos.choix(valstart, valend);
   }
+else  
+  if (s1 === valstart || s2 === valstart) {
+    return true;
   }
 else
   if (s1 === valend || s2 === valend) {
-    if (qui == start) {
-      return false;
-    }
-  else {
-      return true;
+    return false;
   }
-  }
+else {game.dominos.retour(par, lien, ag, fnct1, fnct2)}
 }
 
+game.dominos.choix = function (x, y) {
+  var par = document.querySelector("body");
+  var form = document.createElement('form');
+  var p = document.createElement('p');
+  var inpt1 = document.createElement('input');
+  var inpt2 = document.createElement('input');
+  form.setAttribute("class", "formu");
+  p.innerHTML = "vous pouvez jouer"+" "+x+" "+"ou"+" "+y+", lequel voulez vous jouer?"
+  inpt1.setAttribute("type", "submit");
+  inpt1.setAttribute("value", x);
+  inpt1.setAttribute("id", "inpt1");// trouver une autre solution que le form;//regarder le form dans initialize.js
+  inpt2.setAttribute("type", "submit");
+  inpt2.setAttribute("value", y);
+  inpt2.setAttribute("id", "inpt2");
+  form.addEventListener("click", game.dominos.Alors);
+  par.appendChild(form);
+  form.appendChild(p);
+  form.appendChild(inpt1);
+  form.appendChild(inpt2);
+}
+
+game.dominos.Alors = function(event) {
+  var inpt = event.target;
+  console.log(inpt);
+};
